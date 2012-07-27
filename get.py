@@ -1,7 +1,6 @@
 import os
 import re
 import sys
-import argparse
 
 if(len(sys.argv)!=2):
     print "PLease provide a course name"

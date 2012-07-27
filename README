@@ -1,7 +1,7 @@
 This is a python script to download coursera lecture videos and files.
 
 Requirements:
-	python 2.7
+	python 2.6
 	mechanize 0.2.5
 	beautifulsoup 4
 
