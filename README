@@ -5,7 +5,6 @@ Requirements:
 	mechanize 0.2.5
 	beautifulsoup 4
 
-
 First edit the config.py file:
 	username
 	password
@@ -14,11 +13,11 @@ First edit the config.py file:
 To start the download, execute in a terminal:
 	python get.py <coursename>
 Coursename can be determined from the url of the course.
-eg: https://class.coursera.org/*nlp*/lecture/index
 
+eg: https://class.coursera.org/*nlp*/lecture/index
 To download lectures of nlp class, execute:
-	python get.py nlp
+	`python get.py nlp`
 
 Limitations:
-	Initially it will download all the lectures from the beginning
-	To download selected lectures, hack into the get.py script
+	* Initially it will download all the lectures from the beginning. To download selected lectures, hack the get.py script
+	* It does not resume incomplete downloads.
