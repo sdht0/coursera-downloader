@@ -3,7 +3,7 @@ import re
 import sys
 
 if(len(sys.argv)!=2):
-    print "PLease provide a course name"
+    print "Please provide a course name"
     exit(1)
 else:
     course=sys.argv[1]
@@ -11,8 +11,8 @@ else:
 try:
     from bs4 import BeautifulSoup
     from mechanize import Browser
-except ImportError:
-    print ("Not all the nessesary libs are installed. Please see requirements.txt.")
+except ImportError as err:
+    print ("error: %s. Please see requirements.txt.") % err.message
     exit(1)
 
 login_url=('https://www.coursera.org/%s/auth/auth_redirector?type=login&subtype=normal&email=') % course
@@ -30,6 +30,7 @@ try:
 except ImportError:
     print "You should provide config.py file with EMAIL and PASSWORD."
     exit(1)
+
 def login():
     global loggedin
     print "Logging in as",EMAIL,"..."
