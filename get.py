@@ -3,7 +3,7 @@ import re
 import sys
 
 if(len(sys.argv)!=2):
-    print "PLease provide a course name"
+    print "Please provide a course name"
     exit(1)
 else:
     course=sys.argv[1]
