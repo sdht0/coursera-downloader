@@ -30,6 +30,7 @@ try:
 except ImportError:
     print "You should provide config.py file with EMAIL and PASSWORD."
     exit(1)
+
 def login():
     global loggedin
     print "Logging in as",EMAIL,"..."
