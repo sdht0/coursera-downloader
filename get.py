@@ -11,8 +11,8 @@ else:
 try:
     from bs4 import BeautifulSoup
     from mechanize import Browser
-except ImportError:
-    print ("Not all the nessesary libs are installed. Please see requirements.txt.")
+except ImportError as err:
+    print ("error: %s. Please see requirements.txt.") % err.message
     exit(1)
 
 login_url=('https://www.coursera.org/%s/auth/auth_redirector?type=login&subtype=normal&email=') % course
