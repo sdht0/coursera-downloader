@@ -15,7 +15,7 @@ except ImportError as err:
     print ("error: %s. Please see requirements.txt.") % err.message
     exit(1)
 
-login_url=('https://www.coursera.org/%s/auth/auth_redirector?type=login&subtype=normal&email=') % course
+login_url=('https://class.coursera.org/%s/auth/auth_redirector?type=login&subtype=normal') % course
 lectures_url='https://class.coursera.org/%s/lecture/index' % course
 loggedin=0
 
