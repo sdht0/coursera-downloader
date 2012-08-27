@@ -1,23 +1,34 @@
+Coursera Downloader
+==================
+
 This is a python script to download coursera lecture videos and files.
 
+coursera.py is the latest and greatest
+    * rewritten with class structure
+    * saves cookies
+    * shows download progress
+
+get.py is the original script, has been kept until the new script is fully tested.
+
 Requirements:
-	python 2.6
-	mechanize 0.2.5
-	beautifulsoup 4
+    python 2.6
+    beautifulsoup 4
 
 First edit the config.py file:
-	username
-	password
-	files to download: mp4, srt, txt, pdf, pptx
+    username
+    password
+    files to download: mp4, srt, txt, pdf, pptx
+    foldermapping: if you want the name of folder different from the coursename
+    downloadpath: default is current directory
 
 To start the download, execute in a terminal:
-	python get.py <coursename>
+    python get.py <coursename>
 Coursename can be determined from the url of the course.
 
-eg: https://class.coursera.org/*nlp*/lecture/index
+eg: https://class.coursera.org/ml-2012-002/lecture/index
 To download lectures of nlp class, execute:
-	`python get.py nlp`
+    `python get.py ml-2012-002`
 
 Limitations:
-	* Initially it will download all the lectures from the beginning. To download selected lectures, hack the get.py script
-	* It does not resume incomplete downloads.
+    * Initially it will download all the lectures from the beginning. To download selected lectures, hack the coursera.py script
+    * It does not resume incomplete downloads.

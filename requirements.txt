@@ -1,4 +1,2 @@
 BeautifulSoup4
 	pip install beautifulsoup4
-mechanize
-	pip install mechanize
