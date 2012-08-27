@@ -148,7 +148,7 @@ class CourseraDownloader:
         ret=self.getdownloadlist()
         if ret==-1:
             return -1
-        print "Download list successful!"
+        print "Downloads list obtained!"
         pcd=os.getcwd()
         os.chdir(self.course['downloadfolder'])
         if not os.path.exists(self.course['folder']):
@@ -202,7 +202,6 @@ class CourseraDownloader:
                     count+=1
                 print 
             os.chdir(cd)
-            print
         return 0
 
 def main():    
@@ -212,8 +211,8 @@ def main():
         return
     try:
         from config import email, password, downloadlist, foldermapping, downloadpath
-        if(email=='' or password=='' or downloadlist==[] or foldermapping=={}):
-            print "Please edit config.py with your email and password"
+        if(email=='' or password=='' or downloadlist==[]):
+            print "Please edit config.py with your email, password and download file types "
             return
         if downloadpath=='':
             downloadpath=os.getcwd()
@@ -234,7 +233,7 @@ def main():
     if ret==-1:
         print "Failed :( ! Please try again"
     else:
-        print "Completed downloading "+course['name']+"."
+        print "Completed downloading "+course['name']+" to "+os.path.join(course['downloadfolder'],course['folder'])
 
 
 if __name__=="__main__":
