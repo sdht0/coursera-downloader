@@ -22,12 +22,12 @@ First edit the config.py file:
     downloadpath: default is current directory
 
 To start the download, execute in a terminal:
-    python get.py <coursename>
-Coursename can be determined from the url of the course.
+    python coursera.py <coursename>
 
+Coursename can be determined from the url of the course.
 eg: https://class.coursera.org/ml-2012-002/lecture/index
-To download lectures of nlp class, execute:
-    `python get.py ml-2012-002`
+To download lectures of ml class, execute:
+    python coursera.py ml-2012-002
 
 Limitations:
     * Initially it will download all the lectures from the beginning. To download selected lectures, hack the coursera.py script
