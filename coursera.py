@@ -15,14 +15,14 @@ class CourseraDownloader:
         self.auth=auth
         self.loggedin=0
 
-        self.cookiefilepath=os.path.join(os.getcwd(),"cookie")
+        self.cookiefilepath=course['cookiepath']+"_"+course['name']
         self.cookie = cookielib.LWPCookieJar()
         if os.path.isfile(self.cookiefilepath):
             self.cookie.load(self.cookiefilepath)
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookie))
         urllib2.install_opener(opener)
 
-        self.headers =  {'User-agent' : 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.168 Chrome/18.0.1025.168 Safari/535.19'}
+        self.headers =  {'User-Agent' : 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.168 Chrome/18.0.1025.168 Safari/535.19'}
         
     def printerror(self,url,e):
 
@@ -221,19 +221,22 @@ def main():
         return
     auth={"email":email,"password":password}
     course={}
-    course['name']=args[1]
-    if course['name'] in foldermapping:
-        course['folder']=foldermapping[course['name']]
-    else:
-        course['folder']=course['name']
+    course['cookiepath']=os.path.join(os.getcwd(),"cookies","cookie")
     course['downloadlist']=downloadlist
     course['downloadfolder']=downloadpath
-    c=CourseraDownloader(course,auth)
-    ret=c.downloadcontents()
-    if ret==-1:
-        print "Failed :( ! Please try again"
-    else:
-        print "Completed downloading "+course['name']+" to "+os.path.join(course['downloadfolder'],course['folder'])
+    for i in range(1,len(args)):
+        course['name']=args[i]
+        if course['name'] in foldermapping:
+            course['folder']=foldermapping[course['name']]
+        else:
+            course['folder']=course['name']
+        print "\nDownloading",course['name'],"for",auth['email']
+        c=CourseraDownloader(course,auth)
+        if c.downloadcontents()==-1:
+            print "Failed :( ! Please try again"
+            return
+        else:
+            print "Completed downloading "+course['name']+" to "+os.path.join(course['downloadfolder'],course['folder'])
 
 
 if __name__=="__main__":
