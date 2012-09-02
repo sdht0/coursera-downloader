@@ -1,33 +1,39 @@
 Coursera Downloader
 ==================
+version: 2.1
+license: GPLv3
 
 This is a python script to download coursera lecture videos and files.
 
-coursera.py is the latest and greatest
-    * rewritten with class structure
+coursera.py has cool features:
+    * rewritten with a class structure
     * saves cookies
     * shows download progress
+    * can provide multiple coursenames at once
 
-get.py is the original script, has been kept until the new script is fully tested.
+get.py is the original script, I have decided to keep it while I test out coursera.py.
 
 Requirements:
-    python 2.6
-    beautifulsoup 4
+    Python 2.6          (http://python.org/download)
+    Beautiful Soup 4    (http://www.crummy.com/software/BeautifulSoup)
 
 First edit the config.py file:
     username
     password
     files to download: mp4, srt, txt, pdf, pptx
     foldermapping: if you want the name of folder different from the coursename
-    downloadpath: default is current directory
+    downloadpath: files are downloaded to current directory by default
 
-To start the download, execute in a terminal:
-    python coursera.py <coursename>
+To start downloading, execute in a terminal:
+    python coursera.py <coursename1> [<coursename2> <coursename3> ...]
 
 Coursename can be determined from the url of the course.
 eg: https://class.coursera.org/ml-2012-002/lecture/index
 To download lectures of ml class, execute:
     python coursera.py ml-2012-002
+
+Multiple courses can be supplied at once:
+    python coursera.py ml-2012-002 crypto-2012-003 algs4partI-2012-001
 
 Limitations:
     * Initially it will download all the lectures from the beginning. To download selected lectures, hack the coursera.py script
