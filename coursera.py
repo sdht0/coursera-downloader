@@ -17,7 +17,7 @@ except ImportError as err:
 class CourseraDownloader:
 
     def __init__(self, course, auth):
-        course['login_url'] = ('https://class.coursera.org/%s/auth/auth_redirector?type = login&subtype = normal') % course['name']
+        course['login_url'] = ('https://class.coursera.org/%s/auth/auth_redirector?type=login&subtype=normal') % course['name']
         course['lectures_url'] = 'https://class.coursera.org/%s/lecture/index' % course['name']
         self.course = course
         self.auth = auth
@@ -130,7 +130,6 @@ class CourseraDownloader:
         return 0
 
     def downloadcontents(self):
-        print "Downloading for", self.auth['email']
         print "Getting downloads list..."
         ret = self.getdownloadlist()
         if ret == -1:
