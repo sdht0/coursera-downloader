@@ -97,8 +97,10 @@ class CourseraDownloader:
            (bytes_so_far / (1024.0 * 1024.0), total_size / (1024.0 * 1024.0), percent, speed))
         sys.stdout.flush()
 
-        if bytes_so_far >= total_size:
+        if percent >= 100.00:
             sys.stdout.write('\n')
+
+        return percent
 
     def downloadfile(self, url, filename):
         try:
@@ -112,7 +114,8 @@ class CourseraDownloader:
         bytes_so_far = 0
         x = open("temp_" + filename, "wb")
         start_time = time.time()
-        while 1:
+        percent = 0
+        while percent < 100.00:
             try:
                 chunk = response.read(chunk_size)
             except IOError, e:
@@ -120,10 +123,8 @@ class CourseraDownloader:
                 return -1
             x.write(chunk)
             bytes_so_far += len(chunk)
-            if not chunk:
-                break
             speed = bytes_so_far / (1024 * (time.time() - start_time))
-            self.printprogress(bytes_so_far, total_size, speed)
+            percent = self.printprogress(bytes_so_far, total_size, speed)
         x.close()
         os.rename("temp_" + filename, filename)
         return 0
