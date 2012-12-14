@@ -91,17 +91,6 @@ class CourseraDownloader:
         self.html = BeautifulSoup(handle.read())
         return 0
 
-    def printprogress(self, bytes_so_far, total_size, speed):
-        percent = round((bytes_so_far * 100.0) / total_size, 2)
-        sys.stdout.write(" Downloaded %.2f / %.2f MiB (%0.2f%% at %3d kbps)\r" %
-           (bytes_so_far / (1024.0 * 1024.0), total_size / (1024.0 * 1024.0), percent, speed))
-        sys.stdout.flush()
-
-        if percent >= 100.00:
-            sys.stdout.write('\n')
-
-        return percent
-
     def downloadfile(self, url, filename):
         try:
             req = urllib2.Request(url, None, self.headers)
@@ -109,22 +98,40 @@ class CourseraDownloader:
         except IOError, e:
             self.printerror(url, e)
             return -1
-        chunk_size = 8192
-        total_size = int(response.info().getheader('Content-Length').strip())
-        bytes_so_far = 0
         x = open("temp_" + filename, "wb")
-        start_time = time.time()
-        percent = 0
-        while percent < 100.00:
+        hd = response.info().getheader('Content-Length')
+        if hd != None:
+            total_size = int(hd.strip())
+            bytes_so_far = 0
+            chunk_size = 8192
+            start_time = time.time()
+            percent = 0
+            while percent < 100.00:
+                try:
+                    chunk = response.read(chunk_size)
+                except IOError, e:
+                    self.printerror(url, e)
+                    return -1
+                x.write(chunk)
+                bytes_so_far += len(chunk)
+                speed = bytes_so_far / (1024 * (time.time() - start_time))
+                percent = round((bytes_so_far * 100.0) / total_size, 2)
+                if total_size < 1024.0 * 1024.0:
+                    sys.stdout.write(" Downloaded %.2f / %.2f KiB (%0.2f%% at %3d kbps)\r" %
+                        (bytes_so_far / (1024.0), total_size / (1024.0), percent, speed))
+                else:
+                    sys.stdout.write(" Downloaded %.2f / %.2f MiB (%0.2f%% at %3d kbps)\r" %
+                        (bytes_so_far / (1024.0 * 1024.0), total_size / (1024.0 * 1024.0), percent, speed))
+                sys.stdout.flush()
+            sys.stdout.write('\n')
+        else:
             try:
-                chunk = response.read(chunk_size)
+                chunk = response.read()
             except IOError, e:
                 self.printerror(url, e)
                 return -1
             x.write(chunk)
-            bytes_so_far += len(chunk)
-            speed = bytes_so_far / (1024 * (time.time() - start_time))
-            percent = self.printprogress(bytes_so_far, total_size, speed)
+            sys.stdout.write(" Downloaded 100%\n")
         x.close()
         os.rename("temp_" + filename, filename)
         return 0
@@ -205,6 +212,8 @@ def main():
         return
     auth = {"email": email, "password": password}
     course = {}
+    if not os.path.exists("cookies"):
+        os.mkdir("cookies")
     course['cookiepath'] = os.path.join(os.getcwd(), "cookies", "cookie")
     course['downloadlist'] = downloadlist
     course['downloadfolder'] = downloadpath
