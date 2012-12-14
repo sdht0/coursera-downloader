@@ -10,12 +10,14 @@ coursera.py has the following features:
 * shows download progress
 * can provide multiple coursenames at once
 
-get.py is the original script I had written. It has been kept here for reference purposes.
+coursera_py3.py has the same features, and works for python v3
+
+get.py is the original script I had written.
 
 Installation and Usage
 ----------------------
 Requirements:
-* Python 2.6          (http://python.org/download)
+* Python 2.6 or 3.2   (http://python.org/download)
 * Beautiful Soup 4    (http://www.crummy.com/software/BeautifulSoup)
 
 First edit the config.py file and provide the following details:<br />
@@ -27,7 +29,10 @@ First edit the config.py file and provide the following details:<br />
 
 To start downloading, execute in a terminal:<br />
     `python coursera.py coursename1 [coursename2 coursename3 ...]`
-Coursename can be determined from the url of the course. <br />
+Similarly for python3:<br />
+    `python3 coursera_py3.py coursename1 [coursename2 coursename3 ...]`
+
+Coursename can be determined from the url of the course.
 
 eg: To download lectures of ml class (https://class.coursera.org/ml-2012-002/lecture/index), execute:<br />
     `python coursera.py ml-2012-002`
