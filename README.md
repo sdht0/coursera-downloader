@@ -1,7 +1,5 @@
 Coursera Downloader
 ==================
-license: GPLv3
-
 About
 -----
 This is a python script to download coursera lecture videos and files.
@@ -29,15 +27,19 @@ First edit the config.py file and provide the following details:<br />
 
 To start downloading, execute in a terminal:<br />
     `python coursera.py coursename1 [coursename2 coursename3 ...]`
-
 Coursename can be determined from the url of the course. <br />
+
 eg: To download lectures of ml class (https://class.coursera.org/ml-2012-002/lecture/index), execute:<br />
     `python coursera.py ml-2012-002`
 
-Multiple courses can be supplied at once: <br />
+Multiple courses can be entered at once: <br />
     `python coursera.py ml-2012-002 crypto-2012-003 algs4partI-2012-001`
 
 Limitations
 -----------
 * Initially it will download all the lectures from the beginning.
 * It does not resume incomplete downloads.
+
+License
+-------
+GNU GPLv3
