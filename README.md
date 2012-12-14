@@ -28,7 +28,7 @@ First edit the config.py file and provide the following details:<br />
 * downloadpath: files are downloaded to current directory by default
 
 To start downloading, execute in a terminal:<br />
-    `python coursera.py coursename1 [coursename2 coursename3 ...]`
+    `python coursera.py coursename1 [coursename2 coursename3 ...]`<br />
 Similarly for python3:<br />
     `python3 coursera_py3.py coursename1 [coursename2 coursename3 ...]`
 
