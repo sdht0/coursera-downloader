@@ -150,7 +150,7 @@ class CourseraDownloader:
         xa = mydiv.find_all("a", "list_header_link")
         xb = mydiv.find_all("ul", "item_section_list")
         for num, i in enumerate(xa):
-            title = i.find("h3").string.strip(" \r\n").lower()
+            title = i.find("h3").contents[0].strip(" \r\n").lower()
             print "######### " + str(num + 1) + "." + title + " #########"
             title = re.sub(r'\([^)]*\)', '', title).strip(" \r\n")
             folder = str(num + 1) + "-" + re.sub(r'--*', '-', re.sub(r'[^A-Za-z0-9.]', '-', title))
