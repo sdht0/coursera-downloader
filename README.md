@@ -2,7 +2,7 @@ Coursera Downloader
 ==================
 About
 -----
-This is a python script to download coursera lecture videos and files.
+This is a python script to download coursera lecture videos and files (updated to work with the Jan 2013 updates to coursera platform).
 
 coursera.py has the following features:
 * rewritten with a class structure

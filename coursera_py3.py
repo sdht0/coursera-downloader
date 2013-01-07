@@ -23,88 +23,97 @@ class CourseraDownloader:
         self.course = course
         self.auth = auth
         self.loggedin = 0
-
-        self.cookiefilepath = course['cookiepath'] + "_" + course['name']
+        if not os.path.exists("cookies"):
+            os.mkdir("cookies")
+        self.cookiefilepath = os.path.join(os.getcwd(), "cookies", "cookie")+"_"+course['name']
         self.cookie = http.cookiejar.LWPCookieJar()
         if os.path.isfile(self.cookiefilepath):
             self.cookie.load(self.cookiefilepath)
         opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(self.cookie))
         urllib.request.install_opener(opener)
-
-        self.headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.168 Chrome/18.0.1025.168 Safari/535.19'}
-
-    def printerror(self, url, e):
-        print('Failed to open "%s". ' % url)
-        if hasattr(e, 'code'):
-            print('Error code - %s. ' % e.code, end=' ')
-        elif hasattr(e, 'reason'):
-            print("Reason:", e.reason)
+        self.headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:17.0) Gecko/20100101 Firefox/17.0'}
 
     def login(self):
+        print("Logging in...", end=' ')
+        self.cookie.clear()
+        url = self.course['login_url']
         try:
-            self.cookie.clear()
-            url = self.course['login_url']
             req = urllib.request.Request(url, None, self.headers)
             handle = urllib.request.urlopen(req)
         except IOError as e:
-            self.printerror(url, e)
-            return -1
-        else:
-            try:
-                print("Submitting form...", end=' ')
-                headers = self.headers
-                headers['Referer'] = handle.geturl()
-                self.auth['login'] = "Login"
-                url = handle.geturl()
-                req = urllib.request.Request(url, urllib.parse.urlencode(self.auth).encode('utf-8'), self.headers)
-                handle = urllib.request.urlopen(req)
-            except IOError as e:
-                self.printerror(url, e)
-                return -1
-            else:
-                self.cookie.save(self.cookiefilepath)
-                return handle
-
-    def downloadlist(self):
+            raise Exception("Could not open login url: "+e.reason)
+        headers = self.headers
+        headers['Referer'] = handle.geturl()
+        self.auth['login'] = "Login"
+        url = handle.geturl()
+        print("Submitting form...", end=' ')
         try:
-            url = self.course['lectures_url']
+            req = urllib.request.Request(url, urllib.parse.urlencode(self.auth).encode('utf-8'), self.headers)
+            handle = urllib.request.urlopen(req)
+        except IOError as e:
+            raise Exception("Could not submit login form: "+e.reason)
+        self.cookie.save(self.cookiefilepath)
+        print("Login successful!")
+        return handle
+
+    def downloadList(self):
+        url = self.course['lectures_url']
+        try:
             req = urllib.request.Request(url, None, self.headers)
             handle = urllib.request.urlopen(req)
         except IOError as e:
-            self.printerror(url, e)
-            return -1
-        else:
-            return handle
+            raise Exception("Could not download files list: "+e.reason)
+        return handle
 
-    def getdownloadlist(self):
-        handle = self.downloadlist()
-        if handle == -1:
-            return -1
-        if handle.geturl() != self.course['lectures_url']:
-            print("Logging in...", end=' ')
+    def getDownloadData(self):
+        fl = self.downloadList()
+        if fl.geturl() != self.course['lectures_url']:
             self.login()
-            handle = self.downloadlist()
-            if handle == -1:
-                return -1
-            if handle.geturl() != self.course['lectures_url']:
-                return -1
-            print("Login successful!")
-        self.handle = handle
-        self.html = BeautifulSoup(handle.read())
-        return 0
+            fl = self.downloadList()
+            if fl.geturl() != self.course['lectures_url']:
+                raise Exception("File list could not be retrieved successfully")
+        html = BeautifulSoup(fl.read())
+        topics = html.find_all("div", "course-item-list-header")
+        contents = html.find_all("ul", "course-item-list-section-list")
+        alldict = []
+        for itr in range(0,len(contents)):
+            title=topics[itr].find("h3").contents[1].strip().lower()
+            headingsdict = []
+            for content in contents[itr].find_all("li"):
+                links = content.find_all("a")
+                heading = links[0].contents[0].strip().lower()
+                linksdict = dict()
+                for link in links[1:]:
+                    if "txt" in link['href']:
+                        linksdict['txt']=link['href']
+                    elif "srt" in link['href']:
+                        linksdict['srt']=link['href']
+                    elif "pdf" in link['href']:
+                        linksdict['pdf']=link['href']
+                    elif "pptx" in link['href']:
+                        linksdict['pptx']=link['href']
+                    elif "mp4" in link['href']:
+                        linksdict['mp4']=link['href']
+                headingsdict.append({"title":heading,"values":linksdict})
+            alldict.append({"title":title,"values":headingsdict})
+        return alldict
 
-    def downloadfile(self, url, filename):
+    def downloadFile(self, url, filename, dtype):
         try:
             req = urllib.request.Request(url, None, self.headers)
             response = urllib.request.urlopen(req)
         except IOError as e:
             self.printerror(url, e)
             if(e.code != 500):
-                return -1
-            else:
-                return 0
+                return
+            raise Exception("File download unsuccessful")
         x = open("temp_" + filename, "wb")
         hd = response.headers['Content-Length']
+        def getSize(size):
+            if size < 1024.0 * 1024.0:
+                return "%.2f %s" % (size / (1024.0), "KiB")
+            else:
+                return "%.2f %s" % (size / (1024.0 * 1024.0), "MiB")
         if hd != None:
             total_size = int(hd.strip())
             chunk_size = 8192
@@ -115,114 +124,86 @@ class CourseraDownloader:
                 try:
                     chunk = response.read(chunk_size)
                 except IOError as e:
-                    self.printerror(url, e)
-                    return -1
+                    raise Exception("Error downloading file")
                 x.write(chunk)
                 bytes_so_far += len(chunk)
-                speed = bytes_so_far / (1024 * (time.time() - start_time))
+                speed = bytes_so_far / (time.time() - start_time)
                 percent = round((bytes_so_far * 100.0) / total_size, 2)
-                if total_size < 1024.0 * 1024.0:
-                    sys.stdout.write(" Downloaded %.2f / %.2f KiB (%0.2f%% at %3d kbps)\r" %
-                   (bytes_so_far / (1024.0), total_size / (1024.0), percent, speed))
-                else:
-                    sys.stdout.write(" Downloaded %.2f / %.2f MiB (%0.2f%% at %3d kbps)\r" %
-                   (bytes_so_far / (1024.0 * 1024.0), total_size / (1024.0 * 1024.0), percent, speed))
+                sys.stdout.write(dtype + ": Downloaded %0.2f%% (%s / %s at %sps)          \r" %
+                        (percent, getSize(bytes_so_far), getSize(total_size), getSize(speed)))
                 sys.stdout.flush()
-            sys.stdout.write('\n')
         else:
+            sys.stdout.write(dtype + ": Downloading...%\r")
+            start_time = time.time()
             try:
                 chunk = response.read()
-            except IOError, e:
-                self.printerror(url, e)
-                return -1
+            except IOError as e:
+                raise Exception("Error downloading file")
             x.write(chunk)
-            sys.stdout.write(" Downloaded 100%\n")
+            bytes_so_far = len(chunk)
+            speed = bytes_so_far / (time.time() - start_time)
+            sys.stdout.flush()
+            sys.stdout.write(dtype + ": Downloaded 100.00%% (%s / %s at %sps)          \r" %
+                        (getSize(bytes_so_far), getSize(bytes_so_far), getSize(speed)))
+        sys.stdout.write('\n')
         x.close()
         os.rename("temp_" + filename, filename)
-        return 0
 
-    def downloadcontents(self):
+    def downloadContents(self):
         print("Getting downloads list...")
-        ret = self.getdownloadlist()
-        if ret == -1:
-            return -1
+        data = self.getDownloadData()
         print("Downloads list obtained!")
-        pcd = os.getcwd()
         os.chdir(self.course['downloadfolder'])
         if not os.path.exists(self.course['folder']):
             os.mkdir(self.course['folder'])
         os.chdir(self.course['folder'])
-        count = 1
-        mydiv = self.html.find("div", "item_list")
-        xa = mydiv.find_all("a", "list_header_link")
-        xb = mydiv.find_all("ul", "item_section_list")
-        for num, i in enumerate(xa):
-            title = i.find("h3").contents[0].strip(" \r\n").lower()
-            print("######### " + str(num + 1) + "." + title + " #########")
-            title = re.sub(r'\([^)]*\)', '', title).strip(" \r\n")
-            folder = str(num + 1) + "-" + re.sub(r'--*', '-', re.sub(r'[^A-Za-z0-9.]', '-', title))
+        for titleindex, title in enumerate(data):
+            print("######### " + str(titleindex + 1) + "." + title['title'] + " #########")
+            folder = str(titleindex + 1) + "-" + re.sub(r'--*', '-', re.sub(r'[^A-Za-z0-9.]', '-', re.sub(r'\([^)]*\)', '', title['title']).strip(" \r\n")))
             cd = os.getcwd()
             if not os.path.exists(folder):
                 os.mkdir(folder)
             os.chdir(folder)
-            items = xb[num]
-            allli = items.find_all("a", "lecture-link")
-            for j, x in enumerate(allli):
-                ltitle = x.next_element
-                ltitle = re.sub(r'\([^)]*\)', '', ltitle).strip(" \r\n").lower()
-                print("*** " + str(j + 1) + ". " + ltitle + " ***")
-                ele = x.parent.find("div", "item_resource")
-                alla = ele.find_all("a")
-                for a in alla:
-                    url = a["href"]
-                    ext = ""
-                    if "pptx" in a["href"]:
-                        ext = "pptx"
-                    elif "pdf" in a["href"]:
-                        ext = "pdf"
-                    elif "txt" in a["href"]:
-                        ext = "txt"
-                    elif "srt" in a["href"]:
-                        ext = "srt"
-                    elif "download.mp4" in a["href"]:
-                        ext = "mp4"
-                    else:
-                        continue
-                    filename = str(num + 1) + "." + str(j + 1) + "-" + re.sub(r'--*', '-', re.sub(r'[^A-Za-z0-9.]', '-', ltitle.lower())) + "." + ext
-                    if (ext in self.course['downloadlist']):
-                        print("File: " + filename)
+            for headingindex, heading in enumerate(title['values']):
+                ltitle = re.sub(r'\([^)]*\)', '', heading['title']).strip(" \r\n")
+                print("*** " + str(headingindex + 1) + ". " + ltitle + " ***")
+                for dtype in self.course['downloadlist']:
+                    cd2 = os.getcwd()
+                    srtfolder = "srt"
+                    if self.course['separatesrt'] and dtype in ['srt', 'txt']:
+                        if not os.path.exists(srtfolder):
+                            os.mkdir(srtfolder)
+                        os.chdir(srtfolder)
+                    if dtype in heading['values']:
+                        filename = str(titleindex + 1) + "." + str(headingindex + 1) + "-" + re.sub(r'--*', '-', re.sub(r'[^A-Za-z0-9.]', '-', ltitle)) + "." + dtype
                         if(os.path.exists(filename)):
-                            print("Skipping: Already exists")
+                            print("  " + dtype + ": Skipping, Already exists")
                         else:
-                            ret = self.downloadfile(url, filename)
-                            if ret == -1:
-                                return -1
-                    count += 1
+                            self.downloadFile(heading['values'][dtype], filename, "  " + dtype)
+                    else:
+                        print("  " + dtype + ": Not found")
+                    os.chdir(cd2)
                 print()
             os.chdir(cd)
-        return 0
 
 
 def main():
     args = sys.argv
     if len(args) < 2:
-        print("course name missing in arguments")
-        return
+        raise Exception("Course name missing in arguments")
     try:
-        from config import email, password, downloadlist, foldermapping, downloadpath
-        if(email == '' or password == '' or downloadlist == []):
-            print("Please edit config.py with your email, password and download file types ")
-            return
-        if downloadpath == '':
-            downloadpath = os.getcwd()
-    except ImportError as err:
-        print("Error: %s. You should provide config.py with email, password, downloadlist and foldermapping" % err.message)
-        return
+        from config import email, password, downloadlist, foldermapping, downloadpath, separatesrt
+    except ImportError as er:
+        raise Exception("Error: %s. You should provide config.py with email, password, downloadlist and foldermapping" % er.message)
+    if email == '' or password == '' or downloadlist == []:
+        raise Exception("Please edit config.py with your email, password and download file types")
+    if downloadpath == '':
+        downloadpath = os.getcwd()
     auth = {"email": email, "password": password}
     course = {}
-    course['cookiepath'] = os.path.join(os.getcwd(), "cookies", "cookie")
     course['downloadlist'] = downloadlist
     course['downloadfolder'] = downloadpath
+    course['separatesrt'] = separatesrt
     for i in range(1, len(args)):
         course['name'] = args[i]
         if course['name'] in foldermapping:
@@ -231,11 +212,8 @@ def main():
             course['folder'] = course['name']
         print("\nDownloading", course['name'], "to", os.path.join(course['downloadfolder'], course['folder']), "for", auth['email'])
         c = CourseraDownloader(course, auth)
-        if c.downloadcontents() == -1:
-            print ("Failed :( ! Please try again")
-            return
-        else:
-            print ("Completed downloading " + course['name'] + " to " + os.path.join(course['downloadfolder'], course['folder']))
+        c.downloadContents()
+        print ("Completed downloading " + course['name'] + " to " + os.path.join(course['downloadfolder'], course['folder']))
 
 
 if __name__ == "__main__":
