@@ -1,6 +1,6 @@
 email = ''
 password = ''
-downloadlist = ['pdf', 'mp4', 'srt']
+downloadlist = ['pdf', 'mp4', 'srt', 'pptx']
 foldermapping = {
 'algs4partI-2012-001'           :   'algorithms-partI',
 'algo'                          :   'algorithms-design-and-analysis-part1',
@@ -11,12 +11,15 @@ foldermapping = {
 'crypto-2012-003'               :   'cryptography-part1',
 'db'                            :   'introduction-to-databases',
 'friendsmoneybytes-2012-001'    :   'networks-friendsmoneybytes',
+'hetero-2012-001'               :   'heterogeneous-parallel-programming',
+'images-2012-001'               :   'image-and-video-processing',
 'interactivepython-2012-001'    :   'interactive-programming-in-python',
 'ml-2012-002'                   :   'machine-learning',
 'networks-2012-001'             :   'networked-life',
 'neuralnets-2012-001'           :   'neural-networks-for-machine-learning',
 'pgm-2012-002'                  :   'probabilistic-graphical-models',
 'progfun-2012-001'              :   'functional-programming-principles-in-scala',
+'proglang-2012-001'             :   'programming-languages',
 'programming1-2012-001'         :   'learn-to-program-the-fundamentals',
 'qcomp-2012-001'                :   'quantum-mechanics-and-quantum-computing',
 'scientificcomp-2012-001'       :   'scientific-computing',
@@ -24,3 +27,4 @@ foldermapping = {
 'stats1-2012-001'               :   'statistics-one'
 }
 downloadpath = '.'
+separatesrt = False
