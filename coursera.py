@@ -25,7 +25,8 @@ class CourseraDownloader:
             os.mkdir("cookies")
         self.cookiefilepath = os.path.join(os.getcwd(), "cookies", "cookie")+"_"+course['name']
         self.cookie = cookielib.LWPCookieJar()
-        self.cookie.load(self.cookiefilepath)
+        if os.path.isfile(self.cookiefilepath):
+	  self.cookie.load(self.cookiefilepath)
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookie))
         urllib2.install_opener(opener)
         self.headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:17.0) Gecko/20100101 Firefox/17.0'}
