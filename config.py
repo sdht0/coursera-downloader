@@ -1,11 +1,13 @@
 email = ''
 password = ''
-downloadlist = ['pdf', 'mp4', 'srt', 'pptx']
+downloadlist = ['pdf', 'mp4', "srt"] #allowed: pdf, mp4, srt, pptx, txt
 foldermapping = {
+'aiplan-2012-001'               :   'artificial-intelligence-planning',
 'algs4partI-2012-001'           :   'algorithms-partI',
 'algo'                          :   'algorithms-design-and-analysis-part1',
 'algo2-2012-001'                :   'algorithms-design-and-analysis-part2',
 'bigdata-2012-001'              :   'web-intelligence-and-big-data',
+'comnetworks-2012-001'          :   'introduction-to-computer-networks',
 'comparch-2012-001'             :   'computer-architecture',
 'compdata-2012-001'             :   'computing-for-data-analysis',
 'crypto-2012-003'               :   'cryptography-part1',
@@ -26,5 +28,6 @@ foldermapping = {
 'sna-2012-001'                  :   'social-network-analysis',
 'stats1-2012-001'               :   'statistics-one'
 }
-downloadpath = '.'
-separatesrt = False
+downloadpath = '/xfiles/files/open-courseware/coursera/'
+# downloadpath = "."
+separatesrt = True
