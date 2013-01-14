@@ -162,7 +162,7 @@ class CourseraDownloader:
                 bytes_so_far += len(chunk)
                 speed = bytes_so_far / (time.time() - start_time)
                 percent = round((bytes_so_far * 100.0) / total_size, 2)
-                sys.stdout.write(dtype + ": Downloaded %0.2f%% (%s / %s at %sps)\r" %
+                sys.stdout.write(dtype + ": Downloaded %0.2f%% (%s / %s at %sps)          \r" %
                         (percent, getSize(bytes_so_far), getSize(total_size), getSize(speed)))
                 sys.stdout.flush()
         else:
@@ -176,7 +176,7 @@ class CourseraDownloader:
             bytes_so_far = len(chunk)
             speed = bytes_so_far / (time.time() - start_time)
             sys.stdout.flush()
-            sys.stdout.write(dtype + ": Downloaded 100%% (%s / %s at %sps)\r" %
+            sys.stdout.write(dtype + ": Downloaded 100.00%% (%s / %s at %sps)          \r" %
                         (getSize(bytes_so_far), getSize(bytes_so_far), getSize(speed)))
         sys.stdout.write('\n')
         x.close()
