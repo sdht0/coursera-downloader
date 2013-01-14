@@ -5,14 +5,11 @@ About
 This is a python script to download coursera lecture videos and files (updated to work with the Jan 2013 updates to coursera platform).
 
 coursera.py has the following features:
-* rewritten with a class structure
 * saves cookies
 * shows download progress
 * can provide multiple coursenames at once
 
 coursera_py3.py has the same features, and works for python v3
-
-get.py is the original script I had written.
 
 Installation and Usage
 ----------------------
