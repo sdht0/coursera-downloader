@@ -81,17 +81,12 @@ class CourseraDownloader:
                 links = content.find_all("a")
                 heading = links[0].contents[0].strip().lower()
                 linksdict = dict()
+                linktypes = ['txt', 'srt', 'pdf', 'pptx', 'mp4', 'java', 'sml', 'zip']
                 for link in links[1:]:
-                    if "txt" in link['href']:
-                        linksdict['txt']=link['href']
-                    elif "srt" in link['href']:
-                        linksdict['srt']=link['href']
-                    elif "pdf" in link['href']:
-                        linksdict['pdf']=link['href']
-                    elif "pptx" in link['href']:
-                        linksdict['pptx']=link['href']
-                    elif "mp4" in link['href']:
-                        linksdict['mp4']=link['href']
+                    for linktype in linktypes:
+                        if linktype in link['href']:
+                            linksdict[linktype]=link['href']
+                            break
                 headingsdict.append({"title":heading,"values":linksdict})
             alldict.append({"title":title,"values":headingsdict})
         return alldict
@@ -104,16 +99,20 @@ class CourseraDownloader:
         if not os.path.exists(self.course['folder']):
             os.mkdir(self.course['folder'])
         os.chdir(self.course['folder'])
+        if self.course['name']=='proglang-2012-001':
+            data=reversed(data)
+        totaltitle = len(data)
         for titleindex, title in enumerate(data):
-            print "######### " + str(titleindex + 1) + "." + title['title'] + " #########"
+            print "######### " + str(titleindex + 1) + "/"+ str(totaltitle) + ". " + title['title'] + " #########"
             folder = str(titleindex + 1) + "-" + re.sub(r'--*', '-', re.sub(r'[^A-Za-z0-9.]', '-', re.sub(r'\([^)]*\)', '', title['title']).strip(" \r\n")))
             cd = os.getcwd()
             if not os.path.exists(folder):
                 os.mkdir(folder)
             os.chdir(folder)
+            totalheadings = len(title['values'])
             for headingindex, heading in enumerate(title['values']):
                 ltitle = re.sub(r'\([^)]*\)', '', heading['title']).strip(" \r\n")
-                print "*** " + str(headingindex + 1) + ". " + ltitle + " ***"
+                print "*** " + str(headingindex + 1) + "/"+ str(totalheadings) + ". " + ltitle + " ***"
                 for dtype in self.course['downloadlist']:
                     cd2 = os.getcwd()
                     srtfolder = "srt"
@@ -124,12 +123,19 @@ class CourseraDownloader:
                     if dtype in heading['values']:
                         filename = str(titleindex + 1) + "." + str(headingindex + 1) + "-" + re.sub(r'--*', '-', re.sub(r'[^A-Za-z0-9.]', '-', ltitle)) + "." + dtype
                         if(os.path.exists(filename)):
-                            print "  " + dtype + ": Skipping, Already exists"
+                            print "  " + dtype + ": Already exists"
                         else:
-                            self.downloadFile(heading['values'][dtype], filename, "  " + dtype)
-                    else:
-                        print "  " + dtype + ": Not found"
+                            try:
+                                self.downloadFile(heading['values'][dtype], filename, "  " + dtype)
+                            except Exception, e:
+                                print "  " + dtype + ": ", e, " | continue? [Y/n]: ",
+                                o = raw_input()
+                                if o=='n':
+                                    return 1
                     os.chdir(cd2)
+                for typ in heading['values']:
+                    if typ not in self.course['downloadlist']:
+                        print "  " + typ + ": Configured not to download in config.py"
                 print
             os.chdir(cd)
         return 0
@@ -139,7 +145,7 @@ class CourseraDownloader:
             req = urllib2.Request(url, None, self.headers)
             response = urllib2.urlopen(req)
         except IOError, e:
-            raise Exception("File download unsuccessful")
+            raise Exception("File download unsuccessful: "+e.reason)
         x = open("temp_" + filename, "wb")
         hd = response.info().getheader('Content-Length')
         def getSize(size):
@@ -157,7 +163,7 @@ class CourseraDownloader:
                 try:
                     chunk = response.read(chunk_size)
                 except IOError, e:
-                    raise Exception("Error downloading file")
+                    raise Exception("Error downloading file: "+e.reason)
                 x.write(chunk)
                 bytes_so_far += len(chunk)
                 speed = bytes_so_far / (time.time() - start_time)
@@ -171,7 +177,7 @@ class CourseraDownloader:
             try:
                 chunk = response.read()
             except IOError, e:
-                raise Exception("Error downloading file")
+                raise Exception("Error downloading file: "+e.reason)
             x.write(chunk)
             bytes_so_far = len(chunk)
             speed = bytes_so_far / (time.time() - start_time)
