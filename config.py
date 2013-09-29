@@ -1,6 +1,6 @@
 email = ''
 password = ''
-downloadlist = ['pdf', 'mp4', "srt"] #allowed: pdf, mp4, srt, pptx, txt
+downloadlist = ['pdf', 'mp4', "srt", "sml", "java", "zip"]
 foldermapping = {
 'aiplan-2012-001'               :   'artificial-intelligence-planning',
 'algs4partI-2012-001'           :   'algorithms-partI',
@@ -10,7 +10,9 @@ foldermapping = {
 'comnetworks-2012-001'          :   'introduction-to-computer-networks',
 'comparch-2012-001'             :   'computer-architecture',
 'compdata-2012-001'             :   'computing-for-data-analysis',
+'conrob-001'                    :   'control-of-mobile-robots',
 'crypto-2012-003'               :   'cryptography-part1',
+'dataanalysis-001'              :   'data-analysis',
 'db'                            :   'introduction-to-databases',
 'friendsmoneybytes-2012-001'    :   'networks-friendsmoneybytes',
 'hetero-2012-001'               :   'heterogeneous-parallel-programming',
@@ -20,6 +22,7 @@ foldermapping = {
 'networks-2012-001'             :   'networked-life',
 'neuralnets-2012-001'           :   'neural-networks-for-machine-learning',
 'pgm-2012-002'                  :   'probabilistic-graphical-models',
+'posa-001'                      :   'pattern-oriented-software-architectures',
 'progfun-2012-001'              :   'functional-programming-principles-in-scala',
 'proglang-2012-001'             :   'programming-languages',
 'programming1-2012-001'         :   'learn-to-program-the-fundamentals',
@@ -28,6 +31,5 @@ foldermapping = {
 'sna-2012-001'                  :   'social-network-analysis',
 'stats1-2012-001'               :   'statistics-one'
 }
-downloadpath = '/xfiles/files/open-courseware/coursera/'
-# downloadpath = "."
+downloadpath = '.'
 separatesrt = True

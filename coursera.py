@@ -6,6 +6,7 @@ import urllib2
 import cookielib
 import re
 import time
+import traceback
 
 try:
     from bs4 import BeautifulSoup
@@ -13,10 +14,16 @@ except ImportError as err:
     print ("error: %s. Please install Beautiful Soup 4.") % err.message
     sys.exit(1)
 
+def handleError(msg, e):
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    print msg,e
+    print "".join(line for line in lines)
+    sys.exit(1)
+
 class CourseraDownloader:
 
     def __init__(self, course, auth):
-        course['login_url'] = ('https://class.coursera.org/%s/auth/auth_redirector?type=login&subtype=normal') % course['name']
         course['lectures_url'] = 'https://class.coursera.org/%s/lecture/index' % course['name']
         self.course = course
         self.auth = auth
@@ -26,30 +33,35 @@ class CourseraDownloader:
         self.cookiefilepath = os.path.join(os.getcwd(), "cookies", "cookie")+"_"+course['name']
         self.cookie = cookielib.LWPCookieJar()
         if os.path.isfile(self.cookiefilepath):
-	  self.cookie.load(self.cookiefilepath)
+            self.cookie.load(self.cookiefilepath)
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookie))
         urllib2.install_opener(opener)
         self.headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:17.0) Gecko/20100101 Firefox/17.0'}
 
-    def login(self):
+    def login(self, loginurl):
         print "Logging in...",
         self.cookie.clear()
-        url = self.course['login_url']
+        url = loginurl
         try:
             req = urllib2.Request(url, None, self.headers)
             handle = urllib2.urlopen(req)
         except IOError, e:
-            raise Exception("Could not open login url: "+e.reason)
+            handleError("Could not open login url",e)
         print "Submitting form...",
         headers = self.headers
         headers['Referer'] = handle.geturl()
-        self.auth['login'] = "Login"
-        url = handle.geturl()
+        headers['Origin']= 'https://accounts.coursera.org'
+        headers['X-CSRFToken']= ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for x in range(24))
+        headers['Cookie']= 'csrftoken='+headers['X-CSRFToken']
+        headers['X-Requested-With']= 'XMLHttpRequest'
+        headers['Content-Type']= 'application/x-www-form-urlencoded'
+
+        url = "https://accounts.coursera.org/api/v1/login"
         try:
             req = urllib2.Request(url, urllib.urlencode(self.auth), headers)
             handle = urllib2.urlopen(req)
         except IOError, e:
-            raise Exception("Could not submit login form: "+e.reason)
+            handleError("Could not submit login form",e)
         self.cookie.save(self.cookiefilepath)
         print "Login successful!"
         return handle
@@ -60,16 +72,16 @@ class CourseraDownloader:
             req = urllib2.Request(url, None, self.headers)
             handle = urllib2.urlopen(req)
         except IOError, e:
-            raise Exception("Could not download files list: "+e.reason)
+            handleError("Could not download files list at url: %s" % url,e)
         return handle
 
     def getDownloadData(self):
         fl = self.downloadList()
         if fl.geturl() != self.course['lectures_url']:
-            self.login()
+            self.login(fl.geturl())
             fl = self.downloadList()
             if fl.geturl() != self.course['lectures_url']:
-                raise Exception("File list could not be retrieved successfully")
+                raise Exception("File list could not be retrieved successfully. Got url: "+fl.geturl())
         html = BeautifulSoup(fl.read())
         topics = html.find_all("div", "course-item-list-header")
         contents = html.find_all("ul", "course-item-list-section-list")
@@ -94,14 +106,14 @@ class CourseraDownloader:
     def downloadContents(self):
         print "Getting downloads list..."
         data = self.getDownloadData()
+        totaltitle = len(data)
         print "Downloads list obtained!"
         os.chdir(self.course['downloadfolder'])
         if not os.path.exists(self.course['folder']):
             os.mkdir(self.course['folder'])
         os.chdir(self.course['folder'])
-        if self.course['name']=='proglang-2012-001':
+        if self.course['name'] in ['proglang-2012-001','dataanalysis-001']:
             data=reversed(data)
-        totaltitle = len(data)
         for titleindex, title in enumerate(data):
             print "######### " + str(titleindex + 1) + "/"+ str(totaltitle) + ". " + title['title'] + " #########"
             folder = str(titleindex + 1) + "-" + re.sub(r'--*', '-', re.sub(r'[^A-Za-z0-9.]', '-', re.sub(r'\([^)]*\)', '', title['title']).strip(" \r\n")))
@@ -128,7 +140,7 @@ class CourseraDownloader:
                             try:
                                 self.downloadFile(heading['values'][dtype], filename, "  " + dtype)
                             except Exception, e:
-                                print "  " + dtype + ": ", e, " | continue? [Y/n]: ",
+                                print "\n  " + dtype + ": ", e, " | continue? [Y/n]: ",
                                 o = raw_input()
                                 if o=='n':
                                     return 1
@@ -164,6 +176,8 @@ class CourseraDownloader:
                     chunk = response.read(chunk_size)
                 except IOError, e:
                     raise Exception("Error downloading file: "+e.reason)
+                if len(chunk) == 0:
+                    raise Exception("No data received!")
                 x.write(chunk)
                 bytes_so_far += len(chunk)
                 speed = bytes_so_far / (time.time() - start_time)
@@ -178,6 +192,8 @@ class CourseraDownloader:
                 chunk = response.read()
             except IOError, e:
                 raise Exception("Error downloading file: "+e.reason)
+            if len(chunk) == 0:
+                raise Exception("No data received")
             x.write(chunk)
             bytes_so_far = len(chunk)
             speed = bytes_so_far / (time.time() - start_time)
