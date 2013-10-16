@@ -7,6 +7,8 @@ import cookielib
 import re
 import time
 import traceback
+import string
+import random
 
 try:
     from bs4 import BeautifulSoup
