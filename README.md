@@ -14,7 +14,7 @@ coursera_py3.py has the same features, and works for python v3
 Installation and Usage
 ----------------------
 Requirements:
-* Python 2.6 or 3.2   (http://python.org/download)
+* Python 2 or 3   (http://python.org/download)
 * Beautiful Soup 4    (http://www.crummy.com/software/BeautifulSoup)
 
 First edit the config.py file and provide the following details:<br />
@@ -39,7 +39,7 @@ Multiple courses can be entered at once: <br />
 
 Limitations
 -----------
-* Initially it will download all the lectures from the beginning.
+* Initially it downloads all the lectures from the beginning.
 * It does not resume incomplete downloads.
 
 License
