@@ -23,7 +23,7 @@ def handleError(msg, e):
 class CourseraDownloader:
 
     def __init__(self, course, auth):
-        course['lectures_url'] = 'https://class.coursera.org/%s/lecture/index' % course['name']
+        course['lectures_url'] = 'https://class.coursera.org/%s/lecture' % course['name']
         self.course = course
         self.auth = auth
         self.loggedin = 0
@@ -49,8 +49,10 @@ class CourseraDownloader:
         headers = self.headers
         headers['Referer'] = handle.geturl()
         headers['Origin']= 'https://accounts.coursera.org'
-        headers['X-CSRFToken']= ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for x in range(24))
-        headers['Cookie']= 'csrftoken='+headers['X-CSRFToken']
+        headers['X-CSRFToken']= ''.join(random.choice(string.letters + string.digits) for x in range(24))
+        headers['X-CSRF2-Token']= ''.join(random.choice(string.letters + string.digits) for x in range(24))
+        headers['X-CSRF2-Cookie']= 'csrf2_token_%s' % ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for x in range(8))
+        headers['Cookie']= 'csrftoken=%s; %s=%s' % (headers['X-CSRFToken'],headers['X-CSRF2-Cookie'],headers['X-CSRF2-Token'])
         headers['X-Requested-With']= 'XMLHttpRequest'
         headers['Content-Type']= 'application/x-www-form-urlencoded'
 
